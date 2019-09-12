@@ -18,11 +18,11 @@ inline double real(double r) { return r; }
 inline double to_radians(const double& a) { return a * M_PI / 180; }
 
 // ---------------------------------------
-enum Tuple_Type { 
-    kTuple, kPoint, kDirection, kSize, kColor, kLast 
+enum Tuple_Type {
+    kTuple, kPoint, kDirection, kSize, kColor, kLast
     };
-static const char * Tuple_Type_Names[kLast] = { 
-    "Tuple", "Point", "Direction", "Size", "Color" 
+static const char * Tuple_Type_Names[kLast] = {
+    "Tuple", "Point", "Direction", "Size", "Color"
     };
 
 template <typename T>
@@ -61,25 +61,25 @@ struct Tuple {
 };
 
 /**
- * Square matrix 
+ * Square matrix
  */
 template <int TDim, typename TType>
-struct matrix_t {
+struct Matrix {
     std::array<Tuple<TDim, TType, kTuple>, TDim> data;
-    matrix_t() { 
+    Matrix() {
         for (int i=0;i<TDim;i++)
             data[i].data.fill(static_cast<TType>(0));
     }
-    explicit matrix_t(const TType& val) { 
-        for (int i=0;i<TDim;i++) 
+    explicit Matrix(const TType& val) {
+        for (int i=0;i<TDim;i++)
             data[i].data.fill(val);
     }
-    inline const Tuple<TDim, TType, kTuple>& row(int row) const { 
-        return data[row] ; 
+    inline const Tuple<TDim, TType, kTuple>& row(int row) const {
+        return data[row] ;
     }
-    inline Tuple<TDim, TType, kTuple> col(int col) const { 
+    inline Tuple<TDim, TType, kTuple> col(int col) const {
         Tuple<TDim, TType, kTuple> out;
-        for (int row = 0; row < TDim; row++) 
+        for (int row = 0; row < TDim; row++)
             out.data[row] = data[row].data[col];
         return out;
     }
@@ -92,11 +92,11 @@ struct matrix_t {
 };
 
 template <int TDim, typename TType>
-struct ray_t {
+struct Ray {
     Tuple<TDim, TType, kPoint> origin;
     Tuple<TDim, TTYpe, kDirection> direction;
-    ray_t() : origin(0), direction(0,0,1) { }
-    ray_t(Tuple<TDim, TType, kPoint> origin, Tuple<TDim, TTYpe, kDirection> direction) : origin(origin), direction(direction) { }
+    Ray() : origin(0), direction(0,0,1) { }
+    Ray(Tuple<TDim, TType, kPoint> origin, Tuple<TDim, TTYpe, kDirection> direction) : origin(origin), direction(direction) { }
 };
 
 template <int TDim, typename TType>
@@ -118,7 +118,7 @@ Tuple<TDim, TType, kColor> mix(const Tuple<TDim, TType, kColor>& under, const Tu
             upper[1],
             upper[2]
         );
-    if (upper[Alpha] == static_cast<TType>(1)) 
+    if (upper[Alpha] == static_cast<TType>(1))
         return Tuple<TDim, TType, kColor>(
             upper[0],
             upper[1],
@@ -164,7 +164,7 @@ struct Image {
 template<int TDim, typename TType, typename TTypeOut>
 Tuple<TDim, TTypeOut, kColor> convert(const Tuple<TDim, TType, kColor>& source) {
     Tuple<TDim, uint8_t, kColor> out;
-    for (int it=0;it<TDim;it++) 
+    for (int it=0;it<TDim;it++)
         out.data[it] = static_cast<TTypeOut>(source[it]);
     return out;
 }
@@ -183,7 +183,7 @@ void save(const Image<3, uint8_t>& image, const char * filename) {
     file << "P" << 3 << "\n\n";
     file << image.size[0] << " " << image.size[1] << "\n255\n";
     for (size_t it = 0; it < image.area(); it++) {
-        file << (int)image.data[it][0] << " " << (int)image.data[it][1] << " " << (int)image.data[it][2] << "\n"; 
+        file << (int)image.data[it][0] << " " << (int)image.data[it][1] << " " << (int)image.data[it][2] << "\n";
     }
     file.close();
 }
@@ -194,13 +194,13 @@ void save(const Image<3, uint8_t>& image, const char * filename) {
 template <int TDim, typename TType>
 inline TType dot(const Tuple<TDim, TType, kDirection>& a, const Tuple<TDim, TType, kDirection>& b) {
     TType out = static_cast<TType>(0);
-    for (int i = 0; i < TDim; i++) 
+    for (int i = 0; i < TDim; i++)
         out += a[i] * b[i];
-    return out; 
+    return out;
 }
 
 /**
- * Cross product between 2 directions.
+ * Cross product between 2 directions with 3 dimensions.
  */
 template <typename TType>
 inline Tuple<3, TType, kDirection> cross(const Tuple<3, TType, kDirection>& a, const Tuple<3, TType, kDirection>& b) {
@@ -231,7 +231,7 @@ inline Tuple<TDim, TType, kDirection> normalize(const Tuple<TDim, TType, kDirect
 template <int TDim, typename TType, Tuple_Type TClass>
 inline TType sum(const Tuple<TDim, TType, TClass>& tpl) {
     TType out = static_cast<TType>(0);
-    for (int i = 0; i < TDim; i++) 
+    for (int i = 0; i < TDim; i++)
         out += tpl.data[i];
     return out;
 }
@@ -312,9 +312,9 @@ inline Tuple<TDim, TType, kDirection> operator - (const Tuple<TDim, TType, kPoin
  * Matrix x Matrix
  */
 template <int TDimMat, typename TType>
-inline matrix_t<TDimMat, TType> operator *(const matrix_t<TDimMat, TType>& a, const matrix_t<TDimMat, TType>& b)
+inline Matrix<TDimMat, TType> operator *(const Matrix<TDimMat, TType>& a, const Matrix<TDimMat, TType>& b)
 {
-    matrix_t<TDimMat, TType> out;
+    Matrix<TDimMat, TType> out;
     for (int it1 = 0; it1 < TDimMat; it1++) {
         out.data[it1] = a.row(it1) * b.col(it1);
     }
@@ -325,7 +325,7 @@ inline matrix_t<TDimMat, TType> operator *(const matrix_t<TDimMat, TType>& a, co
  * Matrix x Tuple
  */
 template <int TDimMat, int TDimTuple, typename TType, Tuple_Type TClass>
-inline Tuple<TDimTuple, TType, TClass> operator *(const matrix_t<TDimMat, TType>& mat, const Tuple<TDimTuple, TType, TClass>& tuple)
+inline Tuple<TDimTuple, TType, TClass> operator *(const Matrix<TDimMat, TType>& mat, const Tuple<TDimTuple, TType, TClass>& tuple)
 {
     Tuple<TDimTuple, TType, TClass> out;
     for (int td = 0; td < TDimTuple; td++) {
@@ -341,7 +341,7 @@ inline Tuple<TDimTuple, TType, TClass> operator *(const matrix_t<TDimMat, TType>
  * Returns a perspective matrix.
  */
 template <typename TType>
-inline matrix_t<4, TType> make_perspective(TType fov, TType aspect, TType znear, TType zfar)
+inline Matrix<4, TType> make_perspective(TType fov, TType aspect, TType znear, TType zfar)
 {
     // | w, 0,  0,  0 |
     // | 0, h,  0,  0 |
@@ -352,7 +352,7 @@ inline matrix_t<4, TType> make_perspective(TType fov, TType aspect, TType znear,
     TType xScale = yScale / aspect;
     TType nearmfar = znear - zfar;
 
-    matrix_t<4, TType> mat;
+    Matrix<4, TType> mat;
     mat.data[0] = Tuple<4, TType, kTuple>(xScale, 0, 0, 0);
     mat.data[1] = Tuple<4, TType, kTuple>(0, yScale, 0, 0);
     mat.data[2] = Tuple<4, TType, kTuple>(0, 0, (zfar + znear) / nearmfar, -1);
@@ -364,7 +364,7 @@ inline matrix_t<4, TType> make_perspective(TType fov, TType aspect, TType znear,
  * Returns a view matrix.
  */
 template <typename TType>
-matrix_t<4, TType> make_look_at(const Tuple<3, TType, kPoint> &eye,
+Matrix<4, TType> make_look_at(const Tuple<3, TType, kPoint> &eye,
                                 const Tuple<3, TType, kPoint> &at,
                                 const Tuple<3, TType, kDirection> &up)
 {
@@ -373,7 +373,7 @@ matrix_t<4, TType> make_look_at(const Tuple<3, TType, kPoint> &eye,
     Tuple<3, TType, kDirection> yaxis = cross(zaxis, xaxis);
     Tuple<3, TType, kPoint> O(0);
 
-    matrix_t<4, TType> mat;
+    Matrix<4, TType> mat;
     mat.data[0] = Tuple<4, TType, kTuple>(xaxis[0], yaxis[0], zaxis[0], 0);
     mat.data[1] = Tuple<4, TType, kTuple>(xaxis[1], yaxis[1], zaxis[1], 0);
     mat.data[2] = Tuple<4, TType, kTuple>(xaxis[2], yaxis[2], zaxis[2], 0);
@@ -434,8 +434,8 @@ std::ostream& operator <<(std::ostream& stream, const Tuple<TDim, TType, TClass>
  * Matrix to string
  */
 template <int TDim, typename TType>
-std::ostream& operator <<(std::ostream& stream, const matrix_t<TDim, TType>& value) {
-    stream << term::cyan << "matrix_t" << term::reset <<  "<" << term::dark_gray << TDim << "," << type_name<TType>() << term::reset << ">(\n";
+std::ostream& operator <<(std::ostream& stream, const Matrix<TDim, TType>& value) {
+    stream << term::cyan << "Matrix" << term::reset <<  "<" << term::dark_gray << TDim << "," << type_name<TType>() << term::reset << ">(\n";
     for (int i = 0; i < TDim; i++) {
         stream << "\t" << value.data[i] <<  (i < TDim -1 ?  ", " : "") << std::endl;
     }
@@ -453,12 +453,12 @@ typedef Tuple<4, double, kColor>        Color4d;
 typedef Tuple<2, int, kSize>            Size2i;
 typedef Tuple<2, double, kPoint>        Point2d;
 typedef Tuple<2, int, kPoint>           Point2i;
-typedef matrix_t<4, double>             Matrix4d;
+typedef Matrix<4, double>             Matrix4d;
 typedef Image<3, double>                Image3d;
 typedef Image<3, uint8_t>               Image3c;
 typedef Image<4, double>                Image4d;
 typedef Image<4, uint8_t>               Image4c;
-typedef ray_t<3, double>                Ray3d;
+typedef Ray<3, double>                Ray3d;
 typedef Triangle<3, double>             Triangle3d;
 
 // ---------------------------------------
@@ -487,7 +487,7 @@ void test_1()
     mat2.identity(0.0, 3.0);
     Matrix4d mat3 = make_perspective<double>(60.0, 4/3.0, 0.1, 100.0);
     Matrix4d mat4 = make_look_at<double>(Point3d(5, 5, 5), Point3d(0, 0, 0), Direction3d(0, 1,0));
-    
+
     // std::cout << "dot product of " << pt1 << " and " << pt2 << " is " << dot(pt1, pt2) << std::endl; // no matching function
     // std::cout << "pt1 * vec1 is " << (pt1 * vec1) << std::endl; // no matching function
 
