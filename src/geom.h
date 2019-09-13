@@ -6,7 +6,7 @@
 
 namespace vgi {
 
-typedef uint32_t index_t;
+typedef size_t index_t;
 
 struct Face {
     index_t vertices[3];
@@ -20,6 +20,9 @@ struct Mesh {
     std::vector<Point2d> uvmap;
     std::vector<Face> faces;
     Triangle3d get_triangle(index_t face_index) const;
+    bool load(const char * filename);
+    Mesh();
+    ~Mesh();
 };
 
 struct Hit {

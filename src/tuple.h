@@ -49,8 +49,8 @@ template <int TDim, typename TType, Tuple_Type TClass>
 struct Tuple {
     std::array<TType, TDim> data;
     Tuple() { data.fill(static_cast<TType>(0)); }
+    // ~Tuple() { std::cout<<"~"<<*this<<std::endl; }
     explicit Tuple(const TType &a) { data.fill(a); }
-    ~Tuple() { std::cout<<"~"<<*this<<std::endl; }
     Tuple(const TType &a, const TType &b) { data[0] = a; data[1] = b; }
     Tuple(const TType &a, const TType &b, const TType &c) { data[0] = a; data[1] = b; data[2] = c; }
     Tuple(const TType &a, const TType &b, const TType &c, const TType &d) { data[0] = a; data[1] = b; data[2] = c; data[3] = d; }
