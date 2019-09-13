@@ -26,13 +26,11 @@ static const char * Tuple_Type_Names[kLast] = {
     };
 
 template <typename T>
-std::string type_name()
-{
+std::string type_name() {
     int status;
     std::string tname = typeid(T).name();
     char *demangled_name = abi::__cxa_demangle(tname.c_str(), NULL, NULL, &status);
-    if (status == 0)
-    {
+    if (status == 0) {
         tname = demangled_name;
         std::free(demangled_name);
     }
@@ -149,7 +147,7 @@ struct Image {
         }
     }
     inline size_t area() const { return size[0] * size[1]; }
-    inline Size2i get_size() const { return size; }
+    inline Tuple<2, int, kSize> get_size() const { return size; }
 
     template <int extdim>
     void set(const Tuple<2, int, kPoint>& at, const Tuple<extdim, TType, kColor>& color) {
@@ -161,42 +159,6 @@ struct Image {
 // ---------------------------------------
 // Methods
 // ---------------------------------------
-
-/**
- * Convert a color from <TType> to <TTypeOut>.
- */
-template<int TDim, typename TType, typename TTypeOut>
-Tuple<TDim, TTypeOut, kColor> convert(const Tuple<TDim, TType, kColor>& source) {
-    Tuple<TDim, uint8_t, kColor> out;
-    for (int it=0;it<TDim;it++)
-        out.data[it] = static_cast<TTypeOut>(source[it]);
-    return out;
-}
-
-/**
- * Convert an image from <TType> to uint8_t.
- */
-template<int TDim, typename TType>
-void convert(const Image<TDim, TType>& image, Image<TDim, uint8_t>& out) {
-    out.allocate(image.size);
-    for (size_t it = 0; it < image.area(); it++) {
-        out.data[it] = convert<3, double, uint8_t>(image.data[it] * 255.0);
-    }
-}
-
-/**
- * Save the image to file using PPM (uncompressed) format.
- */
-void save(const Image<3, uint8_t>& image, const char * filename) {
-    std::ofstream file;
-    file.open(filename);
-    file << "P" << 3 << "\n\n";
-    file << image.size[0] << " " << image.size[1] << "\n255\n";
-    for (size_t it = 0; it < image.area(); it++) {
-        file << (int)image.data[it][0] << " " << (int)image.data[it][1] << " " << (int)image.data[it][2] << "\n";
-    }
-    file.close();
-}
 
 /**
  * Dot product between 2 directions.
@@ -374,7 +336,7 @@ inline Matrix<4, TType> make_perspective(TType fov, TType aspect, TType znear, T
  * Returns a view matrix.
  */
 template <typename TType>
-Matrix<4, TType> make_look_at(const Tuple<3, TType, kPoint> &eye,
+inline Matrix<4, TType> make_look_at(const Tuple<3, TType, kPoint> &eye,
                                 const Tuple<3, TType, kPoint> &at,
                                 const Tuple<3, TType, kDirection> &up)
 {
@@ -418,7 +380,7 @@ enum Code
 }; // namespace term
 
 static bool term_color_activated = true;
-std::ostream &operator<<(std::ostream &os, const term::Code &code)
+inline std::ostream &operator<<(std::ostream &os, const term::Code &code)
 {
     if (! term_color_activated) return os;
     return os << "\033[" << (int)code << "m";
@@ -428,7 +390,7 @@ std::ostream &operator<<(std::ostream &os, const term::Code &code)
  * Tuple to string
  */
 template <int TDim, typename TType, Tuple_Type TClass>
-std::ostream& operator <<(std::ostream& stream, const Tuple<TDim, TType, TClass>& value) {
+inline std::ostream& operator <<(std::ostream& stream, const Tuple<TDim, TType, TClass>& value) {
     stream << term::cyan << Tuple_Type_Names[TClass] << term::reset << "<" << term::dark_gray << TDim << "," << type_name<TType>() << term::reset << ">(";
     stream << term::red;
     for (int i = 0; i < TDim; i++) {
@@ -444,7 +406,7 @@ std::ostream& operator <<(std::ostream& stream, const Tuple<TDim, TType, TClass>
  * Matrix to string
  */
 template <int TDim, typename TType>
-std::ostream& operator <<(std::ostream& stream, const Matrix<TDim, TType>& value) {
+inline std::ostream& operator <<(std::ostream& stream, const Matrix<TDim, TType>& value) {
     stream << term::cyan << "Matrix" << term::reset <<  "<" << term::dark_gray << TDim << "," << type_name<TType>() << term::reset << ">(\n";
     for (int i = 0; i < TDim; i++) {
         stream << "\t" << value.data[i] <<  (i < TDim -1 ?  ", " : "") << std::endl;
@@ -456,20 +418,20 @@ std::ostream& operator <<(std::ostream& stream, const Matrix<TDim, TType>& value
 // ---------------------------------------
 // Predefined types
 // ---------------------------------------
-typedef Tuple<3, double, kPoint>        Point3d;
-typedef Tuple<3, double, kDirection>    Direction3d;
-typedef Tuple<3, double, kColor>        Color3d;
-typedef Tuple<4, double, kColor>        Color4d;
-typedef Tuple<2, int, kSize>            Size2i;
-typedef Tuple<2, double, kPoint>        Point2d;
-typedef Tuple<2, int, kPoint>           Point2i;
-typedef Matrix<4, double>             Matrix4d;
-typedef Image<3, double>                Image3d;
-typedef Image<3, uint8_t>               Image3c;
-typedef Image<4, double>                Image4d;
-typedef Image<4, uint8_t>               Image4c;
-typedef Ray<3, double>                Ray3d;
-typedef Triangle<3, double>             Triangle3d;
+typedef Tuple<3, double, kPoint>     Point3d;
+typedef Tuple<3, double, kDirection> Direction3d;
+typedef Tuple<3, double, kColor>     Color3d;
+typedef Tuple<4, double, kColor>     Color4d;
+typedef Tuple<2, int, kSize>         Size2i;
+typedef Tuple<2, double, kPoint>     Point2d;
+typedef Tuple<2, int, kPoint>        Point2i;
+typedef Matrix<4, double>            Matrix4d;
+typedef Image<3, double>             Image3d;
+typedef Image<3, uint8_t>            Image3c;
+typedef Image<4, double>             Image4d;
+typedef Image<4, uint8_t>            Image4c;
+typedef Ray<3, double>               Ray3d;
+typedef Triangle<3, double>          Triangle3d;
 
 // ---------------------------------------
 } // end of namespace
