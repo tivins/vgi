@@ -94,9 +94,9 @@ struct Matrix {
 template <int TDim, typename TType>
 struct Ray {
     Tuple<TDim, TType, kPoint> origin;
-    Tuple<TDim, TTYpe, kDirection> direction;
+    Tuple<TDim, TType, kDirection> direction;
     Ray() : origin(0), direction(0,0,1) { }
-    Ray(Tuple<TDim, TType, kPoint> origin, Tuple<TDim, TTYpe, kDirection> direction) : origin(origin), direction(direction) { }
+    Ray(Tuple<TDim, TType, kPoint> origin, Tuple<TDim, TType, kDirection> direction) : origin(origin), direction(direction) { }
 };
 
 template <int TDim, typename TType>
@@ -149,6 +149,7 @@ struct Image {
         }
     }
     inline size_t area() const { return size[0] * size[1]; }
+    inline Size2i get_size() const { return size; }
 
     template <int extdim>
     void set(const Tuple<2, int, kPoint>& at, const Tuple<extdim, TType, kColor>& color) {
@@ -161,6 +162,9 @@ struct Image {
 // Methods
 // ---------------------------------------
 
+/**
+ * Convert a color from <TType> to <TTypeOut>.
+ */
 template<int TDim, typename TType, typename TTypeOut>
 Tuple<TDim, TTypeOut, kColor> convert(const Tuple<TDim, TType, kColor>& source) {
     Tuple<TDim, uint8_t, kColor> out;
@@ -169,6 +173,9 @@ Tuple<TDim, TTypeOut, kColor> convert(const Tuple<TDim, TType, kColor>& source) 
     return out;
 }
 
+/**
+ * Convert an image from <TType> to uint8_t.
+ */
 template<int TDim, typename TType>
 void convert(const Image<TDim, TType>& image, Image<TDim, uint8_t>& out) {
     out.allocate(image.size);
@@ -177,6 +184,9 @@ void convert(const Image<TDim, TType>& image, Image<TDim, uint8_t>& out) {
     }
 }
 
+/**
+ * Save the image to file using PPM (uncompressed) format.
+ */
 void save(const Image<3, uint8_t>& image, const char * filename) {
     std::ofstream file;
     file.open(filename);
